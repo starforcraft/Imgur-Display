@@ -4,8 +4,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class ImageCache {
     }
 
     private ResourceLocation loadToMinecraft(String imageId, BufferedImage image) {
-        ResourceLocation location = new ResourceLocation(ImgurDisplay.MODID, "textures/image/" + DisplayUtils.encodeToHex(imageId));
+        ResourceLocation location = ResourceLocation.fromNamespaceAndPath(ImgurDisplay.MODID, "textures/image/" + DisplayUtils.encodeToHex(imageId));
         DynamicTexture texture = new DynamicTexture(DisplayUtils.toNativeImage(image));
         imageCache.add(new DisplayImage(texture, location, imageId));
         Minecraft.getInstance().getEntityRenderDispatcher().textureManager.register(location, texture);

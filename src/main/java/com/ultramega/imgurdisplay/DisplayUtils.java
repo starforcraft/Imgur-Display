@@ -10,11 +10,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DisplayUtils {
     public static BufferedImage fetchImageFromUrl(String url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Accept", "image/*");
         connection.connect();
@@ -84,5 +86,17 @@ public class DisplayUtils {
         }
 
         return null;
+    }
+
+    public static Matcher extractIdFormatFromIdOrUrl(String idOrUrl) {
+        if (idOrUrl == null || idOrUrl.isEmpty()) {
+            return null;
+        }
+
+        String regex = "(?:(?:https?://)?i\\.imgur\\.com/)?([a-zA-Z0-9]+)(?:\\.(\\w+))?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(idOrUrl);
+
+        return matcher.matches() ? matcher : null;
     }
 }

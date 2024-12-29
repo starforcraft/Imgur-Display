@@ -17,16 +17,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 @OnlyIn(Dist.CLIENT)
 public class DisplayRenderer extends EntityRenderer<DisplayEntity> {
-    private static final ResourceLocation EMPTY_DISPLAY = new ResourceLocation(ImgurDisplay.MODID, "textures/item/empty_display.png");
-    private static final ResourceLocation DISPLAY_SIDE = new ResourceLocation(ImgurDisplay.MODID, "textures/item/display_side.png");
+    private static final ResourceLocation EMPTY_DISPLAY = ResourceLocation.fromNamespaceAndPath(ImgurDisplay.MODID, "textures/item/empty_display.png");
+    private static final ResourceLocation DISPLAY_SIDE = ResourceLocation.fromNamespaceAndPath(ImgurDisplay.MODID, "textures/item/display_side.png");
 
     private static final float THICKNESS = 1F / 16F;
     private static final float BORDER_THICKNESS = 2F / 16F;
@@ -173,16 +172,14 @@ public class DisplayRenderer extends EntityRenderer<DisplayEntity> {
     }
 
     private static void vertex(VertexConsumer builder, PoseStack matrixStack, float x, float y, float z, float u, float v, int packetLight) {
-        PoseStack.Pose entry = matrixStack.last();
-        Matrix4f matrix4f = entry.pose();
-        Matrix3f matrix3f = entry.normal();
-        builder.vertex(matrix4f, x, y, z)
-                .color(255, 255, 255, 255)
-                .uv(u, v)
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(packetLight)
-                .normal(matrix3f, 0F, 0F, -1F)
-                .endVertex();
+        PoseStack.Pose stack = matrixStack.last();
+        Matrix4f matrix4f = stack.pose();
+        builder.addVertex(matrix4f, x, y, z)
+                .setColor(255, 255, 255, 255)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(packetLight)
+                .setNormal(stack, 0F, 0F, -1F);
     }
 
     private static void renderBoundingBox(DisplayEntity entity, PoseStack poseStack, MultiBufferSource buffer) {

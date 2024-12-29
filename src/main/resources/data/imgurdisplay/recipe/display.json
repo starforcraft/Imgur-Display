@@ -11,7 +11,7 @@
     "W": { "tag": "minecraft:planks" }
   },
   "result": {
-    "item": "imgurdisplay:display",
+    "id": "imgurdisplay:display",
     "count": 1
   }
 }

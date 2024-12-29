@@ -14,9 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -24,8 +22,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -112,15 +110,15 @@ public class DisplayEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.getEntityData().define(ID, "");
-        this.getEntityData().define(FACING, Direction.NORTH);
-        this.getEntityData().define(WIDTH, 1);
-        this.getEntityData().define(HEIGHT, 1);
-        this.getEntityData().define(STRETCHED, false);
-        this.getEntityData().define(EDIT_RESTRICTED, false);
-        this.getEntityData().define(SHOW_HITBOX, true);
-        this.getEntityData().define(OWNER, Optional.empty());
+    protected void defineSynchedData(final SynchedEntityData.Builder builder) {
+        builder.define(ID, "");
+        builder.define(FACING, Direction.NORTH);
+        builder.define(WIDTH, 1);
+        builder.define(HEIGHT, 1);
+        builder.define(STRETCHED, false);
+        builder.define(EDIT_RESTRICTED, false);
+        builder.define(SHOW_HITBOX, true);
+        builder.define(OWNER, Optional.empty());
     }
 
     @Override
@@ -324,16 +322,6 @@ public class DisplayEntity extends Entity {
     @Override
     protected boolean repositionEntityAfterLoad() {
         return false;
-    }
-
-    @Override
-    public @NotNull AABB getBoundingBoxForCulling() {
-        return getBoundingBox();
-    }
-
-    @Override
-    protected float getEyeHeight(final Pose pPose, final EntityDimensions pDimensions) {
-        return 0.0F;
     }
 
     @Override

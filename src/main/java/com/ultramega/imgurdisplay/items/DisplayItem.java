@@ -1,7 +1,7 @@
 package com.ultramega.imgurdisplay.items;
 
 import com.ultramega.imgurdisplay.entities.DisplayEntity;
-import com.ultramega.imgurdisplay.registry.ModEntities;
+import com.ultramega.imgurdisplay.registry.ModEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -29,7 +29,7 @@ public class DisplayItem extends Item {
 
         Level level = context.getLevel();
 
-        DisplayEntity display = new DisplayEntity(ModEntities.DISPLAY.get(), level);
+        DisplayEntity display = new DisplayEntity(ModEntityTypes.DISPLAY.get(), level);
         display.setFacing(facing);
         display.setImagePosition(offset);
         if (player != null) display.setOwner(player.getUUID());
