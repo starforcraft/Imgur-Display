@@ -1,0 +1,9 @@
+{
+	"itemGroup.imgurdisplay" : "Imgur Display",
+	"item.imgurdisplay.display": "Display",
+	"gui.imgurdisplay.imgur_url_id": "Imgur URL or ID",
+	"gui.imgurdisplay.stretch": "Stretch",
+	"gui.imgurdisplay.restrict_editing": "Restrict Editing",
+	"gui.imgurdisplay.no_image_found": "No image found",
+	"gui.imgurdisplay.show_hitbox": "Show Hitbox"
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SWS",
+    "WLW",
+    "SWS"
+  ],
+  "key": {
+    "S": { "item": "minecraft:stick" },
+    "L": { "item": "minecraft:leather" },
+    "W": { "tag": "minecraft:planks" }
+  },
+  "result": {
+    "item": "imgurdisplay:display",
+    "count": 1
+  }
+}
