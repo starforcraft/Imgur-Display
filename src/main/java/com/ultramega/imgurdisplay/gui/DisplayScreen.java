@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class DisplayScreen extends Screen {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(ImgurDisplay.MODID, "textures/gui/display.png");
-    private static final ResourceLocation ERROR_ICON = ResourceLocation.withDefaultNamespace("textures/gui/unseen_notification.png");
+    private static final ResourceLocation ERROR_ICON = ResourceLocation.withDefaultNamespace("icon/unseen_notification");
     public static final int SCREEN_WIDTH = 176;
     public static final int SCREEN_HEIGHT = 146;
 
@@ -38,7 +38,7 @@ public class DisplayScreen extends Screen {
         super(Component.translatable("item.imgurdisplay.display"));
         this.entityUUID = entityUUID;
         this.imageId = imageId;
-        this.imageNotFound = ImageCache.instance().getImageLocation(imageId) == null;
+        this.imageNotFound = !ImageCache.instance().imageExists(imageId);
         this.isStretched = isStretched;
         this.isEditRestricted = isEditRestricted;
         this.isShowHitbox = isShowHitbox;

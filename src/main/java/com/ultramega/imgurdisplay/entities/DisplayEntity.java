@@ -1,5 +1,6 @@
 package com.ultramega.imgurdisplay.entities;
 
+import com.ultramega.imgurdisplay.Config;
 import com.ultramega.imgurdisplay.gui.DisplayScreen;
 import com.ultramega.imgurdisplay.registry.ModItems;
 import net.minecraft.client.Minecraft;
@@ -39,11 +40,12 @@ public class DisplayEntity extends Entity {
     private static final EntityDataAccessor<Boolean> EDIT_RESTRICTED = SynchedEntityData.defineId(DisplayEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SHOW_HITBOX = SynchedEntityData.defineId(DisplayEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(DisplayEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Integer> GIF_FRAME_INDEX = SynchedEntityData.defineId(DisplayEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> GIF_FRAME_COUNT = SynchedEntityData.defineId(DisplayEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> GIF_FRAME_DELAY = SynchedEntityData.defineId(DisplayEntity.class, EntityDataSerializers.INT);
 
     private static final AABB NULL_AABB = new AABB(0D, 0D, 0D, 0D, 0D, 0D);
     private static final double THICKNESS = 1D / 16D;
-    private static final int MAX_WIDTH = 8;
-    private static final int MAX_HEIGHT = 8;
 
     public DisplayEntity(EntityType<?> entityType, Level level) {
         super(entityType, level);
@@ -53,6 +55,17 @@ public class DisplayEntity extends Entity {
     @Override
     public void tick() {
         updateBoundingBox();
+
+        int frameIndex = getGifFrameIndex();
+        int frameCount = getGifFrameCount();
+        int frameDelay = getGifFrameDelay();
+
+        if (frameIndex >= frameCount * frameDelay - 1) {
+            setGifFrameIndex(0);
+        } else {
+            setGifFrameIndex(frameIndex + 1);
+        }
+
         super.tick();
     }
 
@@ -119,6 +132,9 @@ public class DisplayEntity extends Entity {
         builder.define(EDIT_RESTRICTED, false);
         builder.define(SHOW_HITBOX, true);
         builder.define(OWNER, Optional.empty());
+        builder.define(GIF_FRAME_INDEX, 0);
+        builder.define(GIF_FRAME_COUNT, 0);
+        builder.define(GIF_FRAME_DELAY, 1);
     }
 
     @Override
@@ -133,6 +149,9 @@ public class DisplayEntity extends Entity {
         if (compoundTag.contains("owner")) {
             setOwner(compoundTag.getUUID("owner"));
         }
+        setGifFrameIndex(compoundTag.getInt("frameIndex"));
+        setGifFrameCount(compoundTag.getInt("frameCount"));
+        setGifFrameDelay(compoundTag.getInt("frameDelay"));
     }
 
     @Override
@@ -147,6 +166,9 @@ public class DisplayEntity extends Entity {
         if (getOwner().isPresent()) {
             compoundTag.putUUID("owner", getOwner().get());
         }
+        compoundTag.putInt("frameIndex", getGifFrameIndex());
+        compoundTag.putInt("frameCount", getGifFrameCount());
+        compoundTag.putInt("frameDelay", getGifFrameDelay());
     }
 
     @Override
@@ -195,9 +217,9 @@ public class DisplayEntity extends Entity {
         aabb = aabb.inflate(1.1);
         List<DisplayEntity> nearbyEntities = this.level().getEntitiesOfClass(DisplayEntity.class, aabb);
 
-        if(!level().isClientSide()) {
-            for(DisplayEntity display : nearbyEntities) {
-                if(isRemoved() || display.equals(this) || this.getFacing() != display.getFacing()) continue;
+        if (!level().isClientSide()) {
+            for (DisplayEntity display : nearbyEntities) {
+                if (isRemoved() || display.equals(this) || this.getFacing() != display.getFacing()) continue;
 
                 String thisImageID = this.getImageID();
                 String displayImageID = display.getImageID();
@@ -215,12 +237,12 @@ public class DisplayEntity extends Entity {
 
                 boolean isLeft = false, isRight = false, isAbove = false, isBelow = false;
 
-                if(this.getFacing() == Direction.SOUTH || this.getFacing() == Direction.NORTH) {
+                if (this.getFacing() == Direction.SOUTH || this.getFacing() == Direction.NORTH) {
                     isLeft = x2 < x1 && y2 == y1 && (Math.abs(x2 - x1) == 0 || Math.abs(x2 - x1) == display.getDisplayWidth() || Math.abs(x2 - x1) == this.getDisplayWidth()) && sameHeight;
                     isRight = x2 > x1 && y2 == y1 && (Math.abs(x2 - x1) == 0 || Math.abs(x2 - x1) == display.getDisplayWidth() || Math.abs(x2 - x1) == this.getDisplayWidth()) && sameHeight;
                     isAbove = y2 < y1 && x2 == x1 && (Math.abs(y2 - y1) == 0 || Math.abs(y2 - y1) == display.getDisplayHeight() || Math.abs(y2 - y1) == this.getDisplayHeight()) && sameWidth;
                     isBelow = y2 > y1 && x2 == x1 && (Math.abs(y2 - y1) == 0 || Math.abs(y2 - y1) == display.getDisplayHeight() || Math.abs(y2 - y1) == this.getDisplayHeight()) && sameWidth;
-                } else if(this.getFacing() == Direction.EAST || this.getFacing() == Direction.WEST) {
+                } else if (this.getFacing() == Direction.EAST || this.getFacing() == Direction.WEST) {
                     isLeft = z2 < z1 && y2 == y1 && (Math.abs(z2 - z1) == 0 || Math.abs(z2 - z1) == display.getDisplayWidth() || Math.abs(z2 - z1) == this.getDisplayWidth()) && sameHeight;
                     isRight = z2 > z1 && y2 == y1 && (Math.abs(z2 - z1) == 0 || Math.abs(z2 - z1) == display.getDisplayWidth() || Math.abs(z2 - z1) == this.getDisplayWidth()) && sameHeight;
                     isAbove = y2 < y1 && z2 == z1 && (Math.abs(y2 - y1) == 0 || Math.abs(y2 - y1) == display.getDisplayHeight() || Math.abs(y2 - y1) == this.getDisplayHeight()) && sameWidth;
@@ -246,6 +268,16 @@ public class DisplayEntity extends Entity {
     }
 
     private void combineWithDisplay(DisplayEntity display, List<DisplayEntity> nearbyEntities, boolean isLeft, boolean isRight, boolean isAbove, boolean isBelow) {
+        if (isLeft || isRight) {
+            if (display.getDisplayWidth() + this.getDisplayWidth() > Config.displayMaxSize) {
+                return;
+            }
+        } else if (isAbove || isBelow) {
+            if (display.getDisplayHeight() + this.getDisplayHeight() > Config.displayMaxSize) {
+                return;
+            }
+        }
+
         kill();
 
         if (isLeft) {
@@ -358,7 +390,7 @@ public class DisplayEntity extends Entity {
     }
 
     public boolean setDisplayWidth(int width) {
-        width = Math.max(1, Math.min(width, MAX_WIDTH));
+        width = Math.max(1, Math.min(width, Config.displayMaxSize));
         int oldWidth = getDisplayWidth();
         entityData.set(WIDTH, width);
         return oldWidth != width;
@@ -369,7 +401,7 @@ public class DisplayEntity extends Entity {
     }
 
     public boolean setDisplayHeight(int height) {
-        height = Math.max(1, Math.min(height, MAX_HEIGHT));
+        height = Math.max(1, Math.min(height, Config.displayMaxSize));
         int oldHeight = getDisplayHeight();
         entityData.set(HEIGHT, height);
         return oldHeight != height;
@@ -409,5 +441,29 @@ public class DisplayEntity extends Entity {
 
     public void setOwner(UUID owner) {
         entityData.set(OWNER, Optional.ofNullable(owner));
+    }
+
+    public void setGifFrameIndex(int frameIndex) {
+        entityData.set(GIF_FRAME_INDEX, frameIndex);
+    }
+
+    public int getGifFrameIndex() {
+        return entityData.get(GIF_FRAME_INDEX);
+    }
+
+    public void setGifFrameCount(int frameCount) {
+        entityData.set(GIF_FRAME_COUNT, frameCount);
+    }
+
+    public int getGifFrameCount() {
+        return entityData.get(GIF_FRAME_COUNT);
+    }
+
+    public void setGifFrameDelay(int frameDelay) {
+        entityData.set(GIF_FRAME_DELAY, frameDelay);
+    }
+
+    public int getGifFrameDelay() {
+        return entityData.get(GIF_FRAME_DELAY);
     }
 }

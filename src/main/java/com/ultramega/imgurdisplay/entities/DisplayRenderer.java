@@ -1,6 +1,5 @@
 package com.ultramega.imgurdisplay.entities;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -22,6 +21,8 @@ import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
+import java.awt.geom.Point2D;
+
 @OnlyIn(Dist.CLIENT)
 public class DisplayRenderer extends EntityRenderer<DisplayEntity> {
     private static final ResourceLocation EMPTY_DISPLAY = ResourceLocation.fromNamespaceAndPath(ImgurDisplay.MODID, "textures/item/empty_display.png");
@@ -39,12 +40,12 @@ public class DisplayRenderer extends EntityRenderer<DisplayEntity> {
 
     @Override
     public void render(DisplayEntity entity, float entityYaw, float partialTick, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
-        renderImage(entity.getImageID(), entity.isStretched(), entity.getFacing(), entity.getDisplayWidth(), entity.getDisplayHeight(), poseStack, buffer, packedLight);
+        renderImage(entity.getImageID(), entity.isStretched(), entity.getGifFrameCount() > 0, entity.getGifFrameIndex(), entity.getGifFrameDelay(), entity.getFacing(), entity.getDisplayWidth(), entity.getDisplayHeight(), poseStack, buffer, packedLight);
         if (entity.isShowHitbox()) renderBoundingBox(entity, poseStack, buffer);
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 
-    public static void renderImage(String imageId, boolean isStretched, Direction facing, float width, float height, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+    public static void renderImage(String imageId, boolean isStretched, boolean isGif, int frameIndex, int frameDelay, Direction facing, float width, float height, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
         matrixStack.pushPose();
 
         float imageRatio = 1F;
@@ -52,13 +53,18 @@ public class DisplayRenderer extends EntityRenderer<DisplayEntity> {
         ResourceLocation location = EMPTY_DISPLAY;
 
         if(!imageId.isEmpty()) {
-            ResourceLocation newLocation = ImageCache.instance().getImage(imageId);
+            ResourceLocation newLocation;
+            if (!isGif) {
+                newLocation = ImageCache.instance().getImage(imageId);
+            } else {
+                newLocation = ImageCache.instance().getGif(imageId, frameIndex / frameDelay);
+            }
 
             if(newLocation != null) {
                 location = newLocation;
-                NativeImage image = ImageCache.instance().getNativeImage(imageId);
-                if (image != null) {
-                    imageRatio = (float) image.getWidth() / (float) image.getHeight();
+                Point2D size = ImageCache.instance().getSize(imageId);
+                if (size != null) {
+                    imageRatio = (float) size.getX() / (float) size.getY();
                     hasImage = true;
                 }
             }
