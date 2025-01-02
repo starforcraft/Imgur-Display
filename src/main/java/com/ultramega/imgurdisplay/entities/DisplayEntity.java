@@ -269,11 +269,11 @@ public class DisplayEntity extends Entity {
 
     private void combineWithDisplay(DisplayEntity display, List<DisplayEntity> nearbyEntities, boolean isLeft, boolean isRight, boolean isAbove, boolean isBelow) {
         if (isLeft || isRight) {
-            if (display.getDisplayWidth() + this.getDisplayWidth() > Config.displayMaxSize) {
+            if (display.getDisplayWidth() + this.getDisplayWidth() > Config.DISPLAY_MAX_SIZE.get()) {
                 return;
             }
         } else if (isAbove || isBelow) {
-            if (display.getDisplayHeight() + this.getDisplayHeight() > Config.displayMaxSize) {
+            if (display.getDisplayHeight() + this.getDisplayHeight() > Config.DISPLAY_MAX_SIZE.get()) {
                 return;
             }
         }
@@ -390,7 +390,7 @@ public class DisplayEntity extends Entity {
     }
 
     public boolean setDisplayWidth(int width) {
-        width = Math.max(1, Math.min(width, Config.displayMaxSize));
+        width = Math.max(1, Math.min(width, Config.DISPLAY_MAX_SIZE.get()));
         int oldWidth = getDisplayWidth();
         entityData.set(WIDTH, width);
         return oldWidth != width;
@@ -401,7 +401,7 @@ public class DisplayEntity extends Entity {
     }
 
     public boolean setDisplayHeight(int height) {
-        height = Math.max(1, Math.min(height, Config.displayMaxSize));
+        height = Math.max(1, Math.min(height, Config.DISPLAY_MAX_SIZE.get()));
         int oldHeight = getDisplayHeight();
         entityData.set(HEIGHT, height);
         return oldHeight != height;
